@@ -100,7 +100,9 @@ program
     }
 
     config.setApiKey(modelId, apiKey);
-    console.log(chalk.green(`\n✓ API key set for ${chalk.bold(model.name)}\n`));
+    console.log(chalk.green(`\n✓ API key set for ${chalk.bold(model.name)}`));
+    console.log(chalk.gray('  Stored securely with restricted file permissions (600)'));
+    console.log(chalk.yellow('  Note: Keys are stored in plaintext locally at ~/.claude-model-switcher/config.json\n'));
   });
 
 // Add a custom model
@@ -134,11 +136,19 @@ program
 program
   .command('config')
   .description('Show current configuration')
-  .action(() => {
-    const cfg = config.getConfig();
+  .option('--show-keys', 'Show full API keys (WARNING: insecure)')
+  .action((options: any) => {
+    const cfg = options.showKeys ? config.getConfig() : config.getSafeConfig();
+
     console.log(chalk.bold('\nConfiguration:\n'));
     console.log(JSON.stringify(cfg, null, 2));
-    console.log();
+
+    if (!options.showKeys && Object.keys(cfg.apiKeys).length > 0) {
+      console.log(chalk.yellow('\nAPI keys are masked for security.'));
+      console.log(chalk.gray('Use --show-keys to display full keys (not recommended)\n'));
+    } else {
+      console.log();
+    }
   });
 
 program.parse(process.argv);

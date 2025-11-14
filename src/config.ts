@@ -22,7 +22,7 @@ export class ConfigManager {
   private loadConfig(): Config {
     try {
       if (!fs.existsSync(CONFIG_DIR)) {
-        fs.mkdirSync(CONFIG_DIR, { recursive: true });
+        fs.mkdirSync(CONFIG_DIR, { recursive: true, mode: 0o700 });
       }
 
       if (fs.existsSync(CONFIG_FILE)) {
@@ -43,7 +43,11 @@ export class ConfigManager {
 
   private saveConfig(): void {
     try {
-      fs.writeFileSync(CONFIG_FILE, JSON.stringify(this.config, null, 2));
+      // Write config file with secure permissions (owner read/write only)
+      fs.writeFileSync(CONFIG_FILE, JSON.stringify(this.config, null, 2), { mode: 0o600 });
+
+      // Explicitly set permissions to ensure they are correct (handles existing files)
+      fs.chmodSync(CONFIG_FILE, 0o600);
     } catch (error) {
       console.error('Error saving config:', error);
       throw error;
@@ -79,5 +83,24 @@ export class ConfigManager {
 
   getConfig(): Config {
     return { ...this.config };
+  }
+
+  getSafeConfig(): Config {
+    // Return config with masked API keys for display purposes
+    const maskedApiKeys: Record<string, string> = {};
+
+    for (const [modelId, apiKey] of Object.entries(this.config.apiKeys)) {
+      if (apiKey && apiKey.length > 8) {
+        // Show first 4 and last 4 characters, mask the middle
+        maskedApiKeys[modelId] = `${apiKey.slice(0, 4)}${'*'.repeat(apiKey.length - 8)}${apiKey.slice(-4)}`;
+      } else if (apiKey) {
+        maskedApiKeys[modelId] = '****';
+      }
+    }
+
+    return {
+      ...this.config,
+      apiKeys: maskedApiKeys,
+    };
   }
 }

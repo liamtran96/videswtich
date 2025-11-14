@@ -9,7 +9,8 @@
   "files": [
     "dist",
     "README.md",
-    "USAGE.md"
+    "USAGE.md",
+    "SECURITY.md"
   ],
   "scripts": {
     "build": "tsc",
