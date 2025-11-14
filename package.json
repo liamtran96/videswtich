@@ -1,0 +1,32 @@
+{
+  "name": "claude-model-switcher",
+  "version": "1.0.0",
+  "description": "Simple CLI tool to switch between Claude Code Pro and other AI models like GLM 4.6",
+  "main": "dist/index.js",
+  "bin": {
+    "model-switcher": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts"
+  },
+  "keywords": [
+    "claude",
+    "cli",
+    "model-switcher",
+    "ai"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "commander": "^11.1.0",
+    "chalk": "^4.1.2",
+    "conf": "^10.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.0",
+    "ts-node": "^10.9.2"
+  }
+}
