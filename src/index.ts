@@ -4,6 +4,7 @@ import { Command } from 'commander';
 import chalk from 'chalk';
 import { ConfigManager } from './config';
 import { getAllModels, getModelById } from './models';
+import { ClaudeCodeIntegration } from './claude-integration';
 
 const program = new Command();
 const config = new ConfigManager();
@@ -52,13 +53,27 @@ program
     const model = getModelById(currentModelId, customModels);
 
     if (model) {
-      console.log(chalk.bold('\nCurrent Model:\n'));
+      console.log(chalk.bold('\nCurrent Model Preference:\n'));
       console.log(`${chalk.green('●')} ${chalk.green.bold(model.name)} ${chalk.cyan(`[${model.id}]`)}`);
       console.log(`  ${chalk.gray(model.description)}`);
       console.log(`  ${chalk.gray(`Provider: ${model.provider}`)}`);
 
       if (model.endpoint) {
         console.log(`  ${chalk.gray(`Endpoint: ${model.endpoint}`)}`);
+      }
+
+      // Check Claude Code status
+      if (ClaudeCodeIntegration.isClaudeInstalled()) {
+        const claudeStatus = ClaudeCodeIntegration.getCurrentClaudeModel();
+        console.log(chalk.bold('\nClaude Code Status:'));
+
+        if (claudeStatus.isDefault) {
+          console.log(chalk.gray('  Using default Anthropic API (Claude Pro)'));
+        } else {
+          console.log(chalk.gray(`  Custom endpoint: ${claudeStatus.baseURL}`));
+        }
+      } else {
+        console.log(chalk.yellow('\n⚠  Claude Code not installed'));
       }
 
       console.log();
@@ -81,9 +96,50 @@ program
       process.exit(1);
     }
 
-    config.setCurrentModel(modelId);
-    console.log(chalk.green(`\n✓ Switched to ${chalk.bold(model.name)}`));
-    console.log(`  ${chalk.gray(model.description)}\n`);
+    // Check if Claude Code is installed
+    if (!ClaudeCodeIntegration.isClaudeInstalled()) {
+      console.log(chalk.yellow('\nWarning: Claude Code not found at ~/.claude/'));
+      console.log(chalk.gray('The model preference will be saved, but Claude Code settings won\'t be updated.'));
+      console.log(chalk.gray('Install Claude Code first: npm install -g @anthropic-ai/claude-code\n'));
+    }
+
+    // Get stored API key for this model
+    const apiKey = config.getApiKey(modelId);
+
+    if (!apiKey) {
+      console.log(chalk.yellow(`\nWarning: No API key set for ${model.name}`));
+      console.log(chalk.gray(`Set it with: model-switcher set-key ${modelId} <your-api-key>\n`));
+    }
+
+    try {
+      // Update Claude Code settings
+      if (ClaudeCodeIntegration.isClaudeInstalled()) {
+        ClaudeCodeIntegration.updateSettings(model, apiKey);
+        console.log(chalk.green(`\n✓ Switched Claude Code to ${chalk.bold(model.name)}`));
+      } else {
+        console.log(chalk.green(`\n✓ Set preference to ${chalk.bold(model.name)}`));
+      }
+
+      // Save preference
+      config.setCurrentModel(modelId);
+
+      console.log(`  ${chalk.gray(model.description)}`);
+
+      if (model.endpoint) {
+        console.log(`  ${chalk.gray(`Endpoint: ${model.endpoint}`)}`);
+      }
+
+      if (apiKey && ClaudeCodeIntegration.isClaudeInstalled()) {
+        console.log(chalk.gray('\n  Claude Code settings updated at ~/.claude/settings.json'));
+        console.log(chalk.gray('  Run "claude" to use the new model\n'));
+      } else {
+        console.log();
+      }
+
+    } catch (error) {
+      console.log(chalk.red(`\nError updating Claude Code settings: ${error}`));
+      console.log(chalk.yellow('Your preference was saved, but Claude Code settings were not updated.\n'));
+    }
   });
 
 // Set API key for a model
