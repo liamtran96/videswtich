@@ -12,14 +12,31 @@ A simple CLI tool to switch between Claude Code Pro and other AI models like GLM
 
 ## Installation
 
+### For Users (After Publishing to npm)
+
 ```bash
+# Install globally
+npm install -g claude-model-switcher
+
+# Start using it immediately
+model-switcher list
+model-switcher use glm-4.6
+```
+
+### For Development
+
+```bash
+# Clone the repository
+git clone https://github.com/liamtran96/videswtich.git
+cd videswtich
+
 # Install dependencies
 npm install
 
 # Build the project
 npm run build
 
-# Link the CLI globally (optional)
+# Link the CLI globally for local testing
 npm link
 ```
 

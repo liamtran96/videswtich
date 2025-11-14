@@ -6,19 +6,44 @@
   "bin": {
     "model-switcher": "./dist/index.js"
   },
+  "files": [
+    "dist",
+    "README.md",
+    "USAGE.md"
+  ],
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
-    "dev": "ts-node src/index.ts"
+    "dev": "ts-node src/index.ts",
+    "prepublishOnly": "npm run build"
   },
   "keywords": [
     "claude",
+    "claude-code",
     "cli",
     "model-switcher",
-    "ai"
+    "ai",
+    "glm",
+    "chatgpt",
+    "llm",
+    "model",
+    "switcher",
+    "terminal",
+    "command-line"
   ],
-  "author": "",
+  "author": "Your Name <your.email@example.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/liamtran96/videswtich.git"
+  },
+  "bugs": {
+    "url": "https://github.com/liamtran96/videswtich/issues"
+  },
+  "homepage": "https://github.com/liamtran96/videswtich#readme",
   "license": "MIT",
+  "engines": {
+    "node": ">=14.0.0"
+  },
   "dependencies": {
     "commander": "^11.1.0",
     "chalk": "^4.1.2",
